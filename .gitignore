@@ -1,3 +1,6 @@
 csv2vcd
 *.o
 *.dSYM/
+__pycache__/
+.pytest_cache/
+.venv/
