@@ -1,0 +1,22 @@
+# Copilot Instructions
+
+- Scope: single C utility [csv2vcd.c](../csv2vcd.c) converts CSV waveforms into VCD for simulators/viewers.
+- CSV expectations: first column is time in seconds; remaining columns are signal values; first row is signal names used to declare VCD vars; second row seeds initial values.
+- Limits: max 20 columns (5 scopes * 4 channels assumption) and 50 chars per cell; VCD identifiers are single ASCII chars starting at '!'+index (only 20 supported).
+- Value handling: values parsed with `strtod`, rounded to 2 decimals via `roundn` before comparison and output; VCD vars emitted as `real 64`.
+- Timing: VCD timescale fixed at 1ns; timestamps converted with `#round(time * 1e9)` so CSV time units must be seconds; header row not timestamped.
+- Change detection: rows after the second emit only on any value change vs `prev`; unchanged rows are skipped; `prev` updates only when a value is written.
+- Output structure: header writes `$date`, `$timescale`, `$scope module dut`, per-signal `$var`, then `$dumpvars` at time 0 for initial values.
+- Performance tweaks: large buffered I/O via `setvbuf`, inline CSV splitting (no `strtok` copies), cached `1e9` and `100.0` constants to reduce per-row overhead.
+- Error handling: minimal; column count and cell length are not validated—enforce upstream.
+- Platform/timing: uses POSIX `gettimeofday`; keep ASCII-only strings; include `<sys/time.h>` when touching timing.
+- Build: `cc -Wall -Wextra -O2 csv2vcd.c -lm -o csv2vcd` (link libm for `round`/`pow`).
+- Run: `./csv2vcd input.csv output.vcd`; tool prints processed row count and elapsed time.
+- Samples: see [examples/simple.csv](../examples/simple.csv) (two signals + changes) and [examples/rounding.csv](../examples/rounding.csv) (round-to-2-decimals behavior).
+- Expected outputs for tests drop the `$date` line for determinism: [tests/fixtures/simple_expected.vcd](../tests/fixtures/simple_expected.vcd), [tests/fixtures/rounding_expected.vcd](../tests/fixtures/rounding_expected.vcd).
+- Tests: `bash tests/run.sh` compiles the binary then diffs generated VCDs (skipping the date line) against fixtures.
+- Identifier mapping: adding >20 signals needs higher `MAX_COLS` and a new VCD id scheme (current single-char ids start at '!').
+- Rounding differences: comparisons rely on the rounded values; keep round precision and VCD formatting in sync when changing.
+- Formatting assumptions: values must be `strtod`-parsable; blanks parse as 0 and can trigger unintended toggles.
+- Control flow: row_counter roles are fixed (0=header, 1=initial dump, >=2=change detection); preserve for readability.
+- Keep outputs deterministic for diffing (other than `$date`); do not reorder signals or timestamps.

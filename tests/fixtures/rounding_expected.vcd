@@ -1,0 +1,11 @@
+$timescale 1ns $end
+$scope module dut $end
+$var real 64 ! v1 $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+r0 !
+$end
+#1
+r0.01 !

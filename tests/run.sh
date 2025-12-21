@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BIN="$ROOT/csv2vcd"
+TMP="$(mktemp)"
+trap 'rm -f "$TMP"' EXIT
+
+cc -Wall -Wextra -O2 "$ROOT/csv2vcd.c" -lm -o "$BIN"
+
+echo "Running simple.csv fixture..."
+"$BIN" "$ROOT/examples/simple.csv" "$TMP"
+tail -n +2 "$TMP" | diff -u "$ROOT/tests/fixtures/simple_expected.vcd" -
+
+echo "Running rounding.csv fixture..."
+"$BIN" "$ROOT/examples/rounding.csv" "$TMP"
+tail -n +2 "$TMP" | diff -u "$ROOT/tests/fixtures/rounding_expected.vcd" -
+
+echo "All tests passed."
