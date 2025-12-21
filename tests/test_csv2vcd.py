@@ -14,6 +14,7 @@ FIXTURES = [
 
 
 def build_binary():
+    """Compile csv2vcd with warnings enabled for test runs."""
     subprocess.run([
         "cc", "-Wall", "-Wextra", "-O2", "-std=c99",
         str(REPO_ROOT / "csv2vcd.c"), "-lm", "-o", str(BIN)
@@ -21,11 +22,13 @@ def build_binary():
 
 
 def strip_date(path: Path) -> list[str]:
+    """Drop the first line ($date) to keep fixtures deterministic."""
     lines = path.read_text().splitlines()
     return lines[1:] if lines else []
 
 
 def run_fixture(csv_path: Path, expected_path: Path):
+    """Run csv2vcd on one CSV and compare against the golden VCD (minus date)."""
     subprocess.run([str(BIN), str(csv_path), str(TMP)], check=True)
     actual = strip_date(TMP)
     expected = expected_path.read_text().splitlines()
@@ -33,6 +36,7 @@ def run_fixture(csv_path: Path, expected_path: Path):
 
 
 def test_fixtures():
+    """Execute all CSV fixtures end-to-end."""
     build_binary()
     for csv_path, expected_path in FIXTURES:
         run_fixture(csv_path, expected_path)

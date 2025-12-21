@@ -4,6 +4,7 @@ REM Requires MinGW-w64 or MSVC compiler
 
 set TARGET=csv2vcd.exe
 set CFLAGS=-Wall -Wextra -O2 -std=c99
+REM Note: if you need std=c99 with cl, flags are ignored; kept for gcc
 
 echo Building %TARGET%...
 

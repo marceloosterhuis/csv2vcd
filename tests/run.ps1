@@ -3,9 +3,9 @@
 
 $ErrorActionPreference = 'Stop'
 
-$RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$Bin = Join-Path $RepoRoot 'csv2vcd.exe'
-$Tmp = New-TemporaryFile
+$RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path) # repo root
+$Bin = Join-Path $RepoRoot 'csv2vcd.exe'                                         # build output
+$Tmp = New-TemporaryFile                                                         # temp VCD
 
 function Cleanup {
     if (Test-Path $Tmp) { Remove-Item $Tmp -Force }
@@ -28,11 +28,11 @@ function Strip-DateAndCompare {
         [string]$Expected
     )
     Write-Host "Running $Csv..."
-    & $Bin $Csv $Tmp
+    & $Bin $Csv $Tmp # run converter
     if ($LASTEXITCODE -ne 0) { Cleanup; exit $LASTEXITCODE }
 
     # Drop the first line ($date) before comparing
-    $Actual = Get-Content $Tmp | Select-Object -Skip 1
+    $Actual = Get-Content $Tmp | Select-Object -Skip 1 # drop $date line
     $ExpectedLines = Get-Content $Expected
     if (-not ($Actual -eq $ExpectedLines)) {
         Write-Error "Mismatch for $Csv"

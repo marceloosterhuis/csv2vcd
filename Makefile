@@ -20,7 +20,7 @@ else
     RMDIR = rm -rf
 endif
 
-# Default target
+# Default target builds the converter
 all: $(TARGET)
 
 # Build the executable

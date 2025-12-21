@@ -104,14 +104,14 @@ int main(int argc, char **argv) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
  
-    // Print Header """
+    // Emit VCD header once: date, timescale, and top-level scope.
     fprintf(vcd,"$date %d-%02d-%02d %02d:%02d:%02d $end\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
     fprintf(vcd,"$timescale 1ns $end\n");
     fprintf(vcd,"$scope module dut $end\n");
  
     while (fgets(row, MAXCHAR_LINE, csv) != NULL)
     {
-
+        // Normalize line endings and split the CSV row in-place.
         char *newline = strchr(row, '\n');
         if (newline) {
             *newline = '\0';
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 
         if (row_counter == 0) 
         {
-            // header
+            // Header row: declare VCD variables from signal names.
             for (int i=1; i < col; i++) {
                 fprintf(vcd,"$var real 64 %c %s $end\n", 33+i-1, cols[i]);
             }
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
         } 
         else if (row_counter == 1)
         {
-            // Initial Value Dump
+            // Initial values: dump all signals at time 0.
             fprintf(vcd,"#0\n");
             fprintf(vcd,"$dumpvars\n");
             for (int i=1; i < col; i++) {
@@ -141,6 +141,7 @@ int main(int argc, char **argv) {
         }
         else
         {
+            // Data rows: detect changes vs previous emitted values.
             updated = false;
             for (int i=1; i < col; i++) {
                 cur[i] = roundn(strtod(cols[i], NULL), 2);
@@ -150,7 +151,7 @@ int main(int argc, char **argv) {
             }
             if (updated)
             {
-               // Emit a timestamp only when any signal changes.
+               // Emit a timestamp only when any signal changes, then write changed signals.
                fprintf(vcd, "#%.0f\n", round(strtod(cols[0], NULL) * INV_TIMESTEP));
                 for (int i=1; i < col; i++) {
                     if ( prev[i] != cur[i] ) { 
