@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build script for csv2vcd on Unix-like systems (macOS, Linux)
+# Build script for csv2vcd on Unix-like systems (macOS, Linux); compiles with warnings enabled and O2
 set -euo pipefail
 
 CC="${CC:-cc}"

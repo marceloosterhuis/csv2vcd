@@ -1,6 +1,5 @@
 #!/usr/bin/env pwsh
-# PowerShell test harness for csv2vcd on Windows
-# Mirrors tests/run.sh logic: runs converter on fixtures and diffs against expected outputs
+# PowerShell test harness for csv2vcd on Windows: builds with gcc, runs fixtures, strips $date, and diffs against goldens
 
 $ErrorActionPreference = 'Stop'
 

@@ -1,5 +1,5 @@
 @echo off
-REM Build script for csv2vcd on Windows
+REM csv2vcd Windows build script: tries MinGW gcc, then MSVC cl; builds with warnings and O2
 REM Requires MinGW-w64 or MSVC compiler
 
 set TARGET=csv2vcd.exe

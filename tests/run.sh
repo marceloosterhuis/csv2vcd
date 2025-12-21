@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# csv2vcd test harness (bash): builds the binary and diffs outputs against fixtures, skipping the date line
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

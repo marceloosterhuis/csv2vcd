@@ -1,3 +1,5 @@
+"""Pytest harness for csv2vcd: builds the binary, runs fixtures, strips $date, and compares to golden VCDs."""
+
 import subprocess
 from pathlib import Path
 
