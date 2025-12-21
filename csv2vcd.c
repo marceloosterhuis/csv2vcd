@@ -1,12 +1,17 @@
 // csv2vcd: convert CSV waveforms to VCD
 // Author: Marcel Oosterhuis
-#include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 #include <stdbool.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <sys/time.h>
+#endif
 
 // 5 scopes * 4 channels
 #define MAX_COLS 20
@@ -38,6 +43,30 @@ static inline int split_row(char *row, char **cols, int max_cols) {
     }
     return count;
 }
+
+#ifdef _WIN32
+// Windows-compatible gettimeofday implementation
+static int gettimeofday_win(struct timeval *tv) {
+    FILETIME ft;
+    unsigned __int64 tmpres = 0;
+    
+    GetSystemTimeAsFileTime(&ft);
+    
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+    
+    // Convert file time to unix epoch (100-nanosecond intervals since Jan 1, 1601)
+    tmpres -= 116444736000000000ULL;
+    tmpres /= 10; // Convert to microseconds
+    
+    tv->tv_sec = (long)(tmpres / 1000000UL);
+    tv->tv_usec = (long)(tmpres % 1000000UL);
+    
+    return 0;
+}
+#define gettimeofday(tv, tz) gettimeofday_win(tv)
+#endif
 
 int main(int argc, char **argv) {
 
