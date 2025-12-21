@@ -49,7 +49,7 @@ chmod +x build.sh
 cc -Wall -Wextra -O2 csv2vcd.c -lm -o csv2vcd
 ```
 
-### Windows
+### Windows build
 
 ```cmd
 # Using build script
@@ -69,13 +69,15 @@ cl /W4 /O2 /Fe:csv2vcd.exe csv2vcd.c
 ```
 
 The tool prints processing statistics:
-```
+
+```text
 Done, processed 4 rows. The elapsed time is 0.001 seconds.
 ```
 
 ## VCD Output
 
 The generated VCD file uses:
+
 - **Timescale**: 1ns (all CSV times must be in seconds)
 - **Scope**: Single module named "dut"
 - **Variables**: Real 64-bit values
@@ -103,6 +105,19 @@ bash tests/run.sh
 
 Tests validate against known fixtures with deterministic output (excluding the `$date` line).
 
+### Windows testing (PowerShell)
+
+```powershell
+pwsh tests/run.ps1
+```
+
+### Pytest (all platforms)
+
+```bash
+pip install pytest
+pytest -q
+```
+
 ## Installation
 
 ### Unix / macOS
@@ -113,6 +128,7 @@ sudo make install
 ```
 
 To uninstall:
+
 ```bash
 sudo make uninstall
 ```
@@ -145,4 +161,4 @@ Marcel Oosterhuis
 
 ## Repository
 
-https://github.com/marceloosterhuis/csv2vcd
+[GitHub repository](https://github.com/marceloosterhuis/csv2vcd)

@@ -1,0 +1,53 @@
+#!/usr/bin/env pwsh
+# PowerShell test harness for csv2vcd on Windows
+# Mirrors tests/run.sh logic: runs converter on fixtures and diffs against expected outputs
+
+$ErrorActionPreference = 'Stop'
+
+$RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$Bin = Join-Path $RepoRoot 'csv2vcd.exe'
+$Tmp = New-TemporaryFile
+
+function Cleanup {
+    if (Test-Path $Tmp) { Remove-Item $Tmp -Force }
+}
+trap { Cleanup; throw }
+
+Write-Host "Building csv2vcd.exe..."
+if (-Not (Get-Command gcc -ErrorAction SilentlyContinue)) {
+    Write-Error "gcc not found; install MinGW-w64 or adjust build step"
+    Cleanup
+    exit 1
+}
+& gcc -Wall -Wextra -O2 -std=c99 (Join-Path $RepoRoot 'csv2vcd.c') -lm -o $Bin
+
+if ($LASTEXITCODE -ne 0) { Cleanup; exit $LASTEXITCODE }
+
+function Strip-DateAndCompare {
+    param(
+        [string]$Csv,
+        [string]$Expected
+    )
+    Write-Host "Running $Csv..."
+    & $Bin $Csv $Tmp
+    if ($LASTEXITCODE -ne 0) { Cleanup; exit $LASTEXITCODE }
+
+    # Drop the first line ($date) before comparing
+    $Actual = Get-Content $Tmp | Select-Object -Skip 1
+    $ExpectedLines = Get-Content $Expected
+    if (-not ($Actual -eq $ExpectedLines)) {
+        Write-Error "Mismatch for $Csv"
+        Write-Host "--- Actual (no date) ---"
+        $Actual | ForEach-Object { Write-Host $_ }
+        Write-Host "--- Expected ---"
+        $ExpectedLines | ForEach-Object { Write-Host $_ }
+        Cleanup
+        exit 1
+    }
+}
+
+Strip-DateAndCompare (Join-Path $RepoRoot 'examples/simple.csv') (Join-Path $RepoRoot 'tests/fixtures/simple_expected.vcd')
+Strip-DateAndCompare (Join-Path $RepoRoot 'examples/rounding.csv') (Join-Path $RepoRoot 'tests/fixtures/rounding_expected.vcd')
+
+Write-Host "All tests passed."
+Cleanup

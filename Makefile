@@ -27,10 +27,15 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(TARGET)
 
-# Run tests
+# Run tests (bash harness by default)
 test: $(TARGET)
 	@echo "Running tests..."
 	@bash tests/run.sh
+
+# Run tests via pytest (requires Python + pytest)
+pytest: $(TARGET)
+	@echo "Running pytest..."
+	pytest -q
 
 # Clean build artifacts
 clean:
