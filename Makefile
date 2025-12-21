@@ -32,10 +32,13 @@ test: $(TARGET)
 	@echo "Running tests..."
 	@bash tests/run.sh
 
-# Run tests via pytest (requires Python + pytest)
+# Run tests via pytest. Ensures a uv-managed venv exists and pytest is installed.
 pytest: $(TARGET)
-	@echo "Running pytest..."
-	pytest -q
+	@echo "Ensuring uv virtual environment and pytest..."
+	@if [ ! -d .venv ]; then uv venv .venv; fi
+	uv pip install pytest
+	@echo "Running pytest via uv (verbose)..."
+	uv run pytest -vv
 
 # Clean build artifacts
 clean:
