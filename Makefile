@@ -59,9 +59,10 @@ help:
 	@echo "csv2vcd Makefile targets:"
 	@echo "  all       - Build the executable (default)"
 	@echo "  test      - Build and run tests"
+	@echo "  pytest    - Build then run pytest via uv (creates .venv if needed)"
 	@echo "  clean     - Remove build artifacts"
 	@echo "  install   - Install to /usr/local/bin (Unix/macOS)"
 	@echo "  uninstall - Remove from /usr/local/bin"
 	@echo "  help      - Show this help message"
 
-.PHONY: all test clean install uninstall help
+.PHONY: all test pytest clean install uninstall help

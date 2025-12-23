@@ -18,6 +18,7 @@
 #define MAXCHAR_COL 50
 // 20 * 50
 #define MAXCHAR_LINE (MAX_COLS * MAXCHAR_COL)
+#define IO_BUF_SIZE (1 << 21) // 2 MiB: good throughput without ballooning RSS
 
 static const double POW10_2 = 100.0;
 static const double INV_TIMESTEP = 1e9; // seconds -> nanoseconds
@@ -98,8 +99,12 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    setvbuf(csv, NULL, _IOFBF, 1 << 20);
-    setvbuf(vcd, NULL, _IOFBF, 1 << 20);
+    // Use full buffering for both input (csv) and output (vcd) to minimize syscalls.
+    // 2 MiB buffers strike a balance: large enough for high throughput on big files,
+    // but small enough to avoid unnecessary RSS (resident set size) growth; beyond a
+    // few MiB, larger buffers tend to give diminishing returns once I/O is bandwidth-bound.
+    setvbuf(csv, NULL, _IOFBF, IO_BUF_SIZE); // read buffer
+    setvbuf(vcd, NULL, _IOFBF, IO_BUF_SIZE); // write buffer
 
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
